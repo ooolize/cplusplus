@@ -1,0 +1,112 @@
+### 题意
+题目大概的意思就是从迷宫中的一个点到另一个点的最短距离。
+
+http://acm.hdu.edu.cn/showproblem.php?pid=1242
+### 分析
+从起始点开始BFS。
+
+广度优先遍历需要一个队列，队列初始只有起始点一个元素，然后只要不为空，就向四周扩散，检查越界与否后判断特殊情况分类处理。
+最后把新节点放到队列中。并更新visit数组来将访问过的节点更新。
+
+因为存在守卫，所以最先到达终点的不一定用时最少。需要用优先队列而不是普通队列
+### 代码
+```c++
+#include <queue>
+#include <iostream>
+#include <vector>
+using std::cout;
+using std::endl;
+using std::cin;
+using std::vector;
+using std::priority_queue;
+
+struct node{//每个节点的位置和最小步数
+    friend bool operator<(const node&l,const node&r);
+    friend bool operator==(const node&l,const node&r);
+    int _ix;
+    int _iy;
+    int step;
+};
+//priority_queue 需要使用
+//tempalete<
+//class T,
+//class Container=vector<T>
+//class Compare=std::less<typename Container::value)type>
+//>
+bool operator<(const node&l,const node&r){
+    return l.step<r.step;
+}
+bool operator==(const node&l,const node&r){
+    return (l._ix==r._ix)&&(l._iy==r._iy);
+}   
+int r[4]={-1,0,1,0};
+int l[4]={0,1,0,-1};
+int  data[128][128];
+bool visit[128][128];
+class Solution{
+    void save(int H,int W){
+        char c;
+        h=H;
+        w=W;
+        //初始化data visit _start _end
+        for(int i=0;i<H;i++){
+            for(int j=0;j<w;j++){
+                cin>>c;
+                data[i][j]=c;
+                visit[i][j]=false;
+                if(c=='r'){
+                    _start._ix=i;
+                    _start._iy=j;
+                    _start.step=0;
+                }
+                else if(c=='a'){
+                    _end._ix=i;
+                    _end._iy=j;
+                }
+            }
+        }
+        //广搜
+        int ans=BFS();
+        if(ans==-1)
+            cout<<"Poor ANGEL has to stay in the prison all his life.\n";
+        else 
+            cout<<ans;
+    }
+
+    bool nodecheck(node& n){
+        if(n._ix<0||n._ix>w||n._iy<0||n._iy>h||visit[n._ix][n._iy]||data[n._ix][n._iy]=='#')return false;
+        return true;
+    }
+    int BFS(){
+        priority_queue<node> pq;
+        //pq初始化
+        pq.push(_start);
+        visit[_start._ix][_start._iy]=true;
+        while(!pq.empty()){
+            node predNode=pq.top(),newNode;
+            pq.pop();
+            if(predNode==_end) return predNode.step;
+            for(int i=0;i<4;i++){//对四个方向
+                //求新节点
+                newNode._ix=predNode._ix+l[i];
+                newNode._iy=predNode._iy+r[i];
+                if(!nodecheck(newNode)) continue;
+                //如果新节点是x
+                if(data[newNode._ix][newNode._iy]=='x')
+                    newNode.step=predNode.step+2;
+                else
+                    newNode.step=predNode.step+1;
+                //压入新节点
+                pq.push(newNode);
+                visit[newNode._ix][newNode._iy]=true;
+            }
+        }
+        return -1;
+    }
+private:
+    node _start;
+    node _end;
+    int w,h;
+};
+
+```
