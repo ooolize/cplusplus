@@ -14,10 +14,12 @@ http://acm.hdu.edu.cn/showproblem.php?pid=1242
 #include <queue>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 using std::cout;
 using std::endl;
 using std::cin;
 using std::vector;
+using std::greater;
 using std::priority_queue;
 
 struct node{//每个节点的位置和最小步数
@@ -33,8 +35,8 @@ struct node{//每个节点的位置和最小步数
 //class Container=vector<T>
 //class Compare=std::less<typename Container::value)type>
 //>
-bool operator<(const node&l,const node&r){
-    return l.step<r.step;
+bool operator>(const node&l,const node&r){
+    return l.step>r.step;
 }
 bool operator==(const node&l,const node&r){
     return (l._ix==r._ix)&&(l._iy==r._iy);
@@ -78,7 +80,7 @@ class Solution{
         return true;
     }
     int BFS(){
-        priority_queue<node> pq;
+        priority_queue<node,vector<node>,greater<node>> pq;//最小堆
         //pq初始化
         pq.push(_start);
         visit[_start._ix][_start._iy]=true;
