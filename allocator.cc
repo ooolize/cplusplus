@@ -26,14 +26,7 @@ public:
     }
 
     void push_back(const T &val){
-        if(_start==nullptr){
-            _start=_alloc.allocate(1);
-            _finish=_start+1;
-            _end_of_storage=_finish;
-
-            _alloc.construct(_start,val);
-        }
-        else if(_finish==_end_of_storage){
+        if(_finish==_end_of_storage){
             reallocate();
             _alloc.construct(_finish++,val);    
         }
@@ -56,19 +49,16 @@ public:
     }
 private:
     void reallocate(){
-        size_t newCapa=capacity()*2;
-        //分配新空间
+        size_t newCapa=capacity()==0?1:capacity()*2;
         auto _newstart=_alloc.allocate(newCapa);
-        auto cur=_start,newcur=_newstart;
-        //搬运元素+析构旧位置的对象
-        while(cur!=_finish){
-            _alloc.construct(newcur++,*cur);
-            _alloc.destroy(cur++);
+        auto _newfinish=std::uninitialized_copy(_start,_finish,_newstart);
+        while(_finish!=_start){
+            _alloc.destroy(--_finish);
         }
-        //回收旧内存
         _alloc.deallocate(_start,capacity());
-        _finish=_newstart+size();
+
         _start=_newstart;
+        _finish=_newfinish;
         _end_of_storage=_start+newCapa;
 
     }//重新分配内存,动态扩容要用的
