@@ -1,0 +1,52 @@
+1.标准流管道：popen(command,mode) 允许一个程序将另一个程序作为新进程来启动，并可以传递数据给它或 者通过它接收数据。
+
+r模式从拉起的程序接受数据，w模式向拉起的程序写入数据
+
+pclose();
+
+int main() 
+{ 
+    char buf[]={"aaa bbb ccc ddd eee fff ggg hhh"}; 
+    FILE *fp = popen("wc -w", "w"); 
+    fwrite(buf, sizeof(buf), 1, fp); 
+    pclose(fp); 
+    return 0; 
+    
+}
+
+
+2.无名管道(PIPE) 亲缘间通信/半双工/是一个临时文件，在内存中，结束通信就结束了
+
+pipe(int fds[2]) 0读1写，创建无名管道之后，获得两个打开的文件描述符，一个进程读，一个进程写
+
+管道的关闭有顺序，如果read时管道已经关闭，那么返回0，如果write时管道已经关闭，那么程序接受SIGPIPE信号，如果不处理就接受程序，如果捕获信号就返回负值
+
+int main(){
+    int fds[2];
+    char buf[128]={0};
+    pipe(fds);
+    if(fork()==0){
+        close(fds[1]);
+        int ret=read(fds[0],buf,sizeof(buf));
+        if(ret>0){
+            buf[strlen(buf)-1]='0';
+            puts(buf);
+        }
+        close(fds[0]);
+    }
+    else{
+        close(fds[0]);
+        write(fds[1],"hello",6);
+        wait();
+        close(fds[1]);
+    }
+}
+
+3.有名管道(FIFO) 不相关进程间的通信
+mkfifo unlink
+使用就是使用一个文件，读模式打开就是读数据，写模式打开就是写模式，
+可以完成单机的服务器/客户端的交互 每个客户端有个管道 服务器有个管道
+
+
+
+

@@ -1,0 +1,44 @@
+MMAP提供了一种内存访问机制，让用户程序直接访问内存，这种机制，相比于在用户态和内核态
+相互拷贝数据，效率更高。
+
+mmap映射内存必须是页面大小的整数倍
+
+void* mmap(void * addr,size_t len,int prot,int flags,int fd,off_t offset) 
+char* p=(char*)mmap(NULL,1<<20,PORT_READ|PROT_WRITE,MAP_SHARED,fd,0);
+
+MAP_SHARED //与其它所有映射这个对象的进程共享映射空间
+
+int munmap( void * addr, size_t len)解除映射关系 
+
+int msync ( void * addr , size_t len, int flags )将共享空间的改变写入磁盘
+
+在设置mmap之前需要将文件大小使用ftrucate扩展
+
+2 MMAP实现共享内存
+父读子写
+int main(){
+    int fd=open("a.txt",O_CREATE|0666);
+    ftruncate(a.txt,1<<20);
+    char* addr=(char*)mmap(NULL,4096,PORT_READ|PORT_WRITE,MAP_SHARED,fd,0);
+    //实际上如果1<<20替换4096会出错
+    if(!fork()){
+        strcpy(addr,"hello\0");
+    }
+    else{
+        wait();
+        printf("%s",addr);
+    }
+    munmap(addr,1<<20);
+
+}
+3.MMAP实现大页
+正常情况下是一页大小是4KB，我们可以通过设置，提高每页的容量。
+这样提高了共享内存的使用效率，降低TLBmiss，提高命中率。
+
+创建要使用文件file-----》将file挂载为大页模式
+sudo mount none /home/lize/day8/huge -t hugetlbfs
+mount看是否成功
+
+因为已经制定文件模式是大页了，所以直接正常使用即可
+
+

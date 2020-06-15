@@ -1,0 +1,91 @@
+1. linux命令
+chmod 664 xx.txt  -rw-rw-r--
+df du 显示磁盘信息
+find /home/user -name main.c|xargs ls -l ，在“/home/user“目录下查找名为 main.c 文件并显示这些文件的详细信息(| 是管道 前面的作为后面的输入)
+通配符 * ? [1-2]
+    
+wc 文件名 统计指定文件中的字节数、字数、行数
+ls|wc -l 计数有多少个文件
+
+echo helloworld >main.c(会有一个\n) 
+
+重定向
+
+grep 搜索文件内容
+xargs将搜索内容按行切割
+find . -name "*.cc"|xargs grep "Obj*"
+
+ps -elf|grep a.out
+netstat -ant 查看网络状态
+
+2.文件操作
+文件指针的文件操作 
+fopen  fclose fread fwrite  fprint fscanf
+opendir readdir 两个结构体(DIR* dirent* ) stat获得文件属性
+文件描述符的文件操作
+open(有一些权限) close read write(返回值3种)  ftruncate lseek fstat获得文件属性 dup2(实际上是公用一个数据结构，增加了一个引用计数) select  
+
+3.i/o复用
+select ---定义读写集合---》FD_ZERO--->select--->FD_ISSET     等待描述符就绪需要多少时间 
+epoll与select
+select的缺点---监控的文件描述符数量有限/每次都需要遍历集合取出相应的，时间复杂度是O(n)/每次select前都需要将集合从用户态向内核态拷贝一次
+epoll的解决方法---内核中维护一个红黑树和就绪链表，注册(epoll_ctl)监控对象时都放到红黑树中,一旦有I/O输入，就放在就绪链表里，每次epoll_wait取就从就绪队列里取就行
+epoll的优点---可监控的文件描述符多/每次不用遍历集合，直接从就绪队列里拿就好/每次不需要从新设置集合，需要监控的直接放在红黑树里即可
+
+4.进程
+getpid getppid 
+getuid getgid
+geteuid getegid
+s 权限最常见的例子是/usr/bin/passwd 
+进程状态：就绪 执行 睡眠
+进程结构：内核 栈 堆 数据段(静态/全局变量) 代码段
+进程管理：ps –aux 查看所有的进程 kill top free(内存) 
+进程创建：fork()---子进程是父进程的复制品，继承了父进程的地址空间。（返回值 0子进程 -1失败）
+进程控制与终止：孤儿进程(父进程先退出) 僵尸进程（子进程没有被清理）
+wait waitpid 
+进程终止：自然返回\exit\_exit\_abort\SIGINT(ctrl+c)\SIGQUIT(ctrl+d)。atexit函数执行 exit不会刷新缓冲区
+守护进程：是一个孤儿进程，父进程退出，子进程脱离控制终端后台运行 需要设置会话组setsid()/child("/")/umask(0)/关闭描述符
+
+5.IPC
+信号：产生 用户/内核/进程/  响应 默认处理(SIG_DFL)/忽略()SIG_IGN)/捕捉处理  
+signal(信号，处理函数)
+sigaction 
+int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+signum是注册的信号，act是一个结构体,oldact是NULL
+struct sigaction { 
+    void (*sa_handler)(int); //老类型的信号处理函数指针 
+    void (*sa_sigaction)(int, siginfo_t *, void *);//新类型的信号处理函数指针 
+    sigset_t sa_mask; //将要被阻塞的信号集合(有一些的操作函数sigemptyset/sigaddset) 
+    int sa_flags; //信号处理方式掩码 (有一些标志位 SA_SIGINFO, SA_NODEFER(可以相互打断，如果没有设置就只能相应一次)) 
+    void (*sa_restorer)(void); //保留，不要使用  
+};
+sigprocmask----全程阻塞，被阻塞的信号不在捕获，
+
+
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+void SignHandlerNew(int iSignNo,siginfo_t *pInfo,void *pReserved) 
+{ 
+    int iSeq=g_iSeq++; 
+    printf("%d Enter SignHandlerNew,signo:%d\n",iSeq,iSignNo); 
+    sleep(3); 
+    printf("%d Leave SignHandlerNew,signo:%d\n",iSeq,iSignNo); 
+    
+}
+int main() 
+{ 
+    char szBuf[8]; 
+    int iRet; 
+    //屏蔽掉 SIGQUIT 信号 
+    sigset_t sigSet; 
+    sigemptyset(&sigSet); 
+    sigaddset(&sigSet,SIGQUIT); 
+    sigprocmask(SIG_BLOCK,&sigSet,NULL); 
+    struct sigaction act; 
+    act.sa_sigaction=SignHandlerNew; 
+    act.sa_flags=SA_SIGINFO; 
+    sigemptyset(&act.sa_mask);
+}
+
+
+
+
