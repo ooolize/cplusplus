@@ -1,0 +1,70 @@
+Redis数据库 
+NoSQL数据库(Redis HBase MongoDB) c语言开发
+
+关闭 
+./redis-cli shutdown(会持久化)
+
+开启
+./redis-server -h xxx -p xxx
+
+后台开启 conf 守护进程
+
+客户端连接 
+连接池/单例 每种语言都有专门的客户端
+
+池的思想，不用每次都建立连接了，拿过来用就好了
+
+
+数据类型:
+string  set get mset mget incr
+map hset hget hexists xxx name 
+list lpush lrange lpop llen lrem lset lindex 
+set sadd srem sismembers smember sdiff sunion sinter
+zset zadd zrem zrange zrank
+
+keys *
+exist xxx
+rename xxx
+expire s1 10 设置生存时间
+
+持久化方案
+1.rdb每个一段时间
+2.aof每次操作都
+
+
+主从复制
+实现需要修改配置文件
+
+持久化保证重启也不会丢失数据，但如果硬盘损坏可能导致数据丢失
+通过redis的主从复制可以避免单点故障
+
+主机一旦发生增删改操作，那么从机会将数据同步到从机中。
+从机不能执行写操作
+
+redis-cluster
+原理：
+1.各个节点彼此互联（PING-PONG机制检测），
+2.客户端连接到任意一个redis节点 都连到了这个集群 ,不需要中间层
+3.redis集群中内置了16384个哈希槽，当需要在集群中放置一个key-value时，
+redis先对key使用crc16算法算出一个槽号，确定交由某个节点处理。
+槽需要连续
+
+集群失败：
+如果任意一台主机挂掉，当前没有slave，则集群进入fail
+如果超过半数以上的master挂掉，无论是否有slave,集群进入fail状态。
+
+搭建集群：
+集群管理工具是ruby语言编写的，使用redis安装包下的一个rb文件 创建集群
+
+查看集群信息：
+cluster info
+查看节点
+cluster nodes
+
+
+kill 主，从机会自动顶上去 主机挂了它在链接上就是slave了
+
+map 键值 字段 字段值
+
+
+

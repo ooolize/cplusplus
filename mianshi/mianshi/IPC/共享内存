@@ -1,0 +1,24 @@
+System V
+共享内存是一段特殊的内存，它将进程需要共享的数据放在一块内存中，所有
+需要访问共享内存的进程会将它映射到进程地址空间，这样通过简单的内存取操作，
+就能得到另一个进程的写入信息，实现进程间的通信
+
+shmgt创建一块共享内存。可能需要参数key（由ftok函数生成），返回一个唯一标识，就像进程号
+shmat将共享内存映射到进程地址空间，返回首地址
+shmdt解除映射关系
+shmctl控制共享内存，通过一组标识符完成，通常用来删除共享内存
+
+int main(){
+    int shmid=shmgt(1000,4096,ICP_CREAT|0666);
+    char* addr=(char*)shmat(shmid,NULL,0);
+    shmdt(shmid);
+}
+
+示例---共享内存两个程序间的对话，定义一个结构体 标识位+信息
+ipcs 查看内存
+ipcrm -m shmid 删除共享内存
+
+实现大页共享内存
+使用echo 20 > /proc/sys/vm/nr_hugepages打开大页开关(root权限)
+需要定义宏SHM_HUGE_2MB
+使用SHM_HUGETLB,SHM_HUGE_2MB模式映射

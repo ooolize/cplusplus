@@ -1,0 +1,70 @@
+1.SQL语言
+结构化查询语言 大多数关系型数据库都支持。用来管理关系数据库。
+常见关系型数据库：Oracle MySQL DB2
+常见非关系型数据库：Redis MongoDB 
+
+数据库服务器（数据库管理程序）----多个数据库DB----多张表
+表的一行称之为一条记录
+
+DDL语言：创建数据库和表的结构 
+create database xxx; 
+show databases;
+use xxx;
+
+show tables;
+create table xxx;
+show create table xxx;
+alter table xxx add/change/drop xxx;
+
+DML语言:用于向数据库表中插入、删除、修改数据
+增加一行 insert xxx (title1,title2) values(value1,value2),(...);
+更新一列 update xxx set title=value where title=oldvalue;
+删除一行 delete from xxx where title=value;
+
+DQL语言：
+select * from person;
+* 可以换成搜索的行号 行号可以使用表达式 使用表达式之后可以使用as作为新表头
+distinct 表示剔除重复数据
+
+where语句:
+> < >= <= = <> / between and / in(...) / like (% ,_) /is null(查找空行)
+
+Order by
+通常放到最后面
+asc升 desc降
+order by culomn limit 
+
+
+数据完整性： 实体完整性 域完整性 参照完整性
+表的约束保证数据完整性：
+.主键约束（Primary Key constraint）
+唯一约束（Unique constraint）
+检查约束（Check constraint）
+.默认约束（Default constraint）
+外键约束（Foreign Key constraint）
+Constraint xxx Foreign Key(DepartmentNo) References Department(RecordNo)
+
+复杂的DQL语言：
+子查询    子查询 将第二个select查询的结果再查询一次  and
+
+合并查询  union 合并两个select查询结果    or
+
+常用统计函数：
+select count(ID) from person; //返回行数 有多少条记录
+select sum(english) as total from person;//返回英语和
+select avg(english) as total from person;//求平均值
+select max(english) as total from person;//求最大值
+
+报表查询  
+group by culomn 按column分组,得到每组的平均信息。
+得到按组分的数据，having 和where相似， 只不过是作用于组
+select sum(english) ,_querywordvg(english) from person group by science having sum(art)<20;
+
+
+连接查询 
+
+
+
+
+
+Alter Table person add Constraint Unique(ID);

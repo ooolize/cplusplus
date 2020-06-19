@@ -1,0 +1,39 @@
+
+信号：产生 用户/内核/进程/  响应 默认处理(SIG_DFL)/忽略()SIG_IGN)/捕捉处理  
+signal(信号，处理函数)
+sigaction 
+int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+signum是注册的信号，act是一个结构体,oldact是NULL
+struct sigaction { 
+    void (*sa_handler)(int); //老类型的信号处理函数指针 
+    void (*sa_sigaction)(int, siginfo_t *, void *);//新类型的信号处理函数指针 
+    sigset_t sa_mask; //将要被阻塞的信号集合(有一些的操作函数sigemptyset/sigaddset) 
+    int sa_flags; //信号处理方式掩码 (有一些标志位 SA_SIGINFO, SA_NODEFER(可以相互打断，如果没有设置就只能相应一次)) 
+    void (*sa_restorer)(void); //保留，不要使用  
+};
+sigprocmask----全程阻塞，被阻塞的信号不在捕获，
+
+
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+void SignHandlerNew(int iSignNo,siginfo_t *pInfo,void *pReserved) 
+{ 
+    int iSeq=g_iSeq++; 
+    printf("%d Enter SignHandlerNew,signo:%d\n",iSeq,iSignNo); 
+    sleep(3); 
+    printf("%d Leave SignHandlerNew,signo:%d\n",iSeq,iSignNo); 
+    
+}
+int main() 
+{ 
+    char szBuf[8]; 
+    int iRet; 
+    //屏蔽掉 SIGQUIT 信号 
+    sigset_t sigSet; 
+    sigemptyset(&sigSet); 
+    sigaddset(&sigSet,SIGQUIT); 
+    sigprocmask(SIG_BLOCK,&sigSet,NULL); 
+    struct sigaction act; 
+    act.sa_sigaction=SignHandlerNew; 
+    act.sa_flags=SA_SIGINFO; 
+    sigemptyset(&act.sa_mask);
+}

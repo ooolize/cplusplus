@@ -1,0 +1,33 @@
+信号量是一种进程间的同步手段， 有时需要保护一段代码只能同一时间被一次执行，
+有时需要限制一段代码最多的执行次数
+
+p 加锁 -1
+v 解锁 +1
+
+semget(key_t key,int nsems,int flag)创建一个信号量集 它的数量是nsems，返回一个表示符
+semop((int semid,struct sembuf *sops,size_t num_sops))对信号量集中的信号进行操作
+具体操作由sembuf指定 是哪个信号 执行什么操作
+struct sembuf{
+    short sem_num; //操作信号量在信号量集合中的编号，第一个信
+    short sem_op; //sem_op 成员的值是信号量在一次操作中需要改变的
+    short sem_flg;
+}
+
+semctl((int semid, int semnum, int cmd, …))
+通过semctl控制信号量，
+cmd=setval/getval 得到某个信号量的数值/使用semun.val设置数值
+
+cmd=setall/getall 使用semun.array设置全部数值,常用来初始化
+
+步骤 :semget--->设置sembuf--->semop---->使用semctl初始化或者显示信号量
+
+
+...是union
+union semun{ 
+    int val; 
+    /* Value for SETVAL */ 
+    struct semid_ds *buf; 
+    /* Buffer for IPC_STAT, IPC_SET */ 
+    unsigned short *array; /* Array for GETALL, SETALL */ 
+    
+}

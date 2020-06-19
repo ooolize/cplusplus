@@ -1,0 +1,23 @@
+
+
+
+mallocc/free 和 new/delete的区别
+                                                                                
+ 1.malloc在堆空间分配。new在自由存储区分配
+ 
+ 2.malloc分配需要指定大小，new不需要
+ 
+ 3.new使用过程中要调用类型的构造函数，而malloc不用
+ 
+ 4.malloc使用返回null,而new抛出bad_alloc异常
+ 
+ 5.malloc分配的空间需要强转，而new 不要、
+ 
+ new过程：
+ 调用operaotr new函数分配空间---》使用构造函数构造对象---》返回指针
+ 
+ delete过程
+ 使用析构函数回收空间----》调用operator delete函数回收空间
+ 
+ new []/delete []
+ 这个是开辟数组空间的时候使用的，开辟的时候多开辟4个字节的空间，用于存储个数。
